@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2023-08-14T14:57:32.370Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36" etag="kDv8YpRMpFUToeHf9jXc" version="21.6.7" type="github">
+<mxfile host="app.diagrams.net" modified="2023-08-14T15:05:31.583Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36" etag="l2N57MvexMVr6x0L_LYK" version="21.6.7" type="github">
   <diagram name="Страница — 1" id="nBrP1E0GAgVyJa1ZpKWH">
-    <mxGraphModel dx="1603" dy="844" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1374" dy="724" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -47,6 +47,9 @@
         </mxCell>
         <mxCell id="g8gEgHumIA5f0x8cdPXF-51" value="AUTHENTICATION" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
           <mxGeometry x="600" y="30" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="g8gEgHumIA5f0x8cdPXF-53" value="&lt;b&gt;CALL&lt;/b&gt;&lt;br&gt;&lt;b&gt;REQUEST&lt;br&gt;&lt;/b&gt;userID&lt;br&gt;timestamp&lt;br&gt;calledAt&lt;br&gt;managerID" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="70" y="372.5" width="92.5" height="92.5" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
