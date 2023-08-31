@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "saleauto"
+name = "saleAuto"
 version = "0.0.0.1"
-description = ""
+description = "saleAuto app"
 authors = ["Dahaka1 <ijoech@gmail.com>"]
 readme = "README.md"
 
