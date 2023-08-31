@@ -1,5 +1,6 @@
 import warnings
 
+from colorama import Fore
 from fastapi import FastAPI, APIRouter
 
 from .. import config
@@ -9,9 +10,9 @@ class Server:
 	"""
 	Use like:
 	server = Server("app", "app")
-	server.include_routers(*args)	-->
+	server.include_router(app_router)	-->
 
-	--> uvicorn main:instance ...
+	--> uvicorn start:instance ...
 	"""
 	__app: FastAPI
 	__routers: list[APIRouter] = []
@@ -58,6 +59,13 @@ class Server:
 		return str(self)
 
 	def __call__(self, *args, **kwargs):
+		docs_string, redoc_string = None, None
+		if self.docs_url:
+			docs_string = f"doc at '{self.docs_url}'"
+		if self.redoc_url:
+			redoc_string = f"redoc at '{self.redoc_url}'"
+		help_string = " & ".join((s for s in (docs_string, redoc_string) if s))
+		print(Fore.BLUE + str(self) + Fore.RESET + f" See the {help_string}.")
 		return self.__default_app()
 
 	def __default_app(self) -> FastAPI:
