@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2023-08-30T10:01:09.544Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36" etag="mn09Yr0ShNROvYhaAM_F" version="21.7.0" type="github">
+<mxfile host="app.diagrams.net" modified="2023-08-31T12:13:24.465Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36" etag="kxzMyG4-qdhN3WRqX7io" version="21.7.1" type="github">
   <diagram name="Страница — 1" id="nBrP1E0GAgVyJa1ZpKWH">
-    <mxGraphModel dx="1304" dy="753" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="3300" pageHeight="2339" background="none" math="0" shadow="0">
+    <mxGraphModel dx="1687" dy="974" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="3300" pageHeight="2339" background="none" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -111,7 +111,7 @@
             <mxPoint x="1695" y="340" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="oQNfvQY3aFG_e4Oa21x_-24" value="RABBITMQ" style="rounded=1;whiteSpace=wrap;html=1;rotation=-90;fontStyle=1" parent="1" vertex="1">
+        <mxCell id="oQNfvQY3aFG_e4Oa21x_-24" value="&lt;strike&gt;RABBITMQ&lt;/strike&gt;&lt;br&gt;HTTP" style="rounded=1;whiteSpace=wrap;html=1;rotation=-90;fontStyle=1" parent="1" vertex="1">
           <mxGeometry x="1685" y="505" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="oQNfvQY3aFG_e4Oa21x_-30" value="NOTIFICATION" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
