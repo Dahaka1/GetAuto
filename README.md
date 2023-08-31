@@ -4,9 +4,9 @@
 - Python;
 - FastAPI + SQLAlchemy + Pydantic + Alembic;
 - PostgreSQL;
-- RabbitMQ;
-- k8s;
+- RabbitMQ (__changed__ to http);
+- k8s (__?__);
 - Redis;
 - aiogram;
-- VueJSж
+- VueJS;
 - nginx.
