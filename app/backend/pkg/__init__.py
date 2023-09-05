@@ -2,10 +2,10 @@ import warnings
 
 from colorama import Fore
 
-from ._deployment import Server
 from ._dependencies import session
+from . import _utils as utils
 
-__all__ = ["Server", "session"]
+__all__ = ["session", "utils"]
 
 
 def warning(msg, *args, **kwargs):
