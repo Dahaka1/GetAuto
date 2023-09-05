@@ -18,6 +18,7 @@ createUser = AppPathCreate(
 	app=AppUrlEnum.business
 ).body("user").headers("x-header").query("param", "test").cookies("refreshToken")
 
+
 getUsers = AppPathCreate(
 	path="/users",
 	method="get",

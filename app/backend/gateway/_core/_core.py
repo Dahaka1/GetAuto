@@ -104,8 +104,11 @@ class AppPath:
 		raise _exceptions.AppPathException(f"App path with ID {self.id} isn't exists")
 
 	def __str__(self):
-		return (f"<AppPath path='{self.path}' login_required={self.login_required} "
+		return (f"<AppPath path='{self.path.replace(self.app, '')}' login_required={self.login_required} "
 				f"method='{self.method}' app='{self.app}'>")
+
+	def __repr__(self):
+		return str(self)
 
 
 class AppPathCreate(AppPath):
@@ -121,7 +124,10 @@ class AppPathCreate(AppPath):
 		self._register()
 
 	def __registered(self) -> bool:
-		return self.dict() in AppPath._urls_list
+		for url in AppPath._urls_list:
+			if url["method"] == self.method and url["path"] == self.path:
+				return True
+		return False
 
 	def _register(self) -> Self:
 		if self.registered:
