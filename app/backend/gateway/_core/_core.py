@@ -3,14 +3,19 @@ import os
 import warnings
 from typing import Literal, Any, Self
 
+from contextlib import asynccontextmanager
+import httpx
 from colorama import Fore
-from fastapi import FastAPI, APIRouter
-from fastapi import Request
+from fastapi import FastAPI, APIRouter, Request, HTTPException, status
+from fastapi.responses import JSONResponse
+from httpx import Response, AsyncClient
 
 import config
 import enums
 from . import _conf, _exceptions
 from ._utils import check_url_path, get_app_from_path, get_client_data_from_request, path_data_equal
+from .._auth import authEnum
+from pkg.logging import error, log
 
 
 class AppPath:
@@ -19,7 +24,7 @@ class AppPath:
 	def __init__(
 		self,
 		path: str,
-		login_required: bool,
+		authType: authEnum | None,
 		method: Literal["get", "put", "post", "delete"],
 		app: enums.AppUrlEnum,
 		id: int = None
@@ -27,7 +32,7 @@ class AppPath:
 		check_url_path(path)
 		self.id = id
 		self.path = self._get_path_string(path, app)
-		self.login_required = login_required
+		self.authType = authType
 		self.method = method
 		self.app = app.value
 		self.request: Request | None = None
@@ -67,10 +72,22 @@ class AppPath:
 			if url_ in path and str(method).lower() == method_ and app.value == app_:
 				if data_ and any(data_) and not path_data_equal(request_data=data, expected_data=data_):
 					continue
-				login_required = url["login_required"]
-				obj = cls(url_, login_required, method_, enums.AppUrlEnum(app_), id=url["id"])
+				auth_type = url.get("authType")
+				login_type = authEnum(auth_type) if auth_type else None
+				obj = cls(url_, login_type, method_, enums.AppUrlEnum(app_), id=url["id"])
 				obj.registered = True
 				return obj
+
+	def get_url(self, url: str) -> str:
+		app_url = self.app.lstrip("/").rstrip("/").upper()
+		template = f"APP_{app_url}_%s"
+		try:
+			host = getattr(config, template % "HOST")
+			port = getattr(config, template % "PORT")
+		except AttributeError:
+			raise _exceptions.AppNotFound(f"{self} host & port (or or) not defined at virtual environment")
+		url = f"http://{host}:{port}{config.GLOBAL_PREFIX}{self.app}{url}"
+		return url
 
 	@staticmethod
 	def __all() -> list[dict[str, Any]]:
@@ -84,7 +101,7 @@ class AppPath:
 			path=self.path,
 			app=self.app,
 			method=self.method,
-			login_required=self.login_required,
+			authType=self.authType.value if self.authType else None,
 			data=self._expects,
 			id=self.id
 		)
@@ -104,7 +121,8 @@ class AppPath:
 		raise _exceptions.AppPathException(f"App path with ID {self.id} isn't exists")
 
 	def __str__(self):
-		return (f"<AppPath path='{self.path.replace(self.app, '')}' login_required={self.login_required} "
+		return (f"<AppPath path='{self.path.replace(self.app, '')}' "
+				f"authType={self.authType.name if self.authType else None} "
 				f"method='{self.method}' app='{self.app}'>")
 
 	def __repr__(self):
@@ -115,11 +133,11 @@ class AppPathCreate(AppPath):
 	def __init__(
 		self,
 		path: str,
-		login_required: bool,
 		method: Literal["get", "put", "post", "delete"],
-		app: enums.AppUrlEnum
+		app: enums.AppUrlEnum,
+		authType: authEnum = None
 	):
-		super().__init__(path, login_required, method, app)
+		super().__init__(path, authType, method, app)
 		self.registered = self.__registered()
 		self._register()
 
@@ -189,13 +207,12 @@ class Server:
 	--> uvicorn start:server ...
 	"""
 	__app: FastAPI = None
-	routers: list[APIRouter] = []
 	__global_router: APIRouter
 
 	def __init__(
 		self,
 		title: str,
-		prefix: str,
+		prefix: enums.AppUrlEnum,
 		openapi_tags: dict[str, str] = None,
 		openapi_url: str = None,
 		docs_url: str = None,
@@ -204,6 +221,7 @@ class Server:
 		summary: str = None,
 		version: str = "0.0.1"
 	):
+		prefix = prefix.value
 		self.title = title
 		if config.GLOBAL_PREFIX in prefix:
 			raise ValueError("Cannot use global prefix \"%s\" at app prefix" % config.GLOBAL_PREFIX)
@@ -222,6 +240,7 @@ class Server:
 		self.summary = summary
 		self.version = version
 		self.contact = config.CONTACT
+		self.routers: list[APIRouter] = []
 
 	def __str__(self):
 		return f"<Server \"{self.title}\">"
@@ -230,6 +249,7 @@ class Server:
 		return str(self)
 
 	def __call__(self, *args, **kwargs) -> FastAPI:
+		print(Fore.BLUE + str(self) + Fore.RESET + f" Server URLs are available by prefix {self.prefix}")
 		print(Fore.BLUE + str(self) + Fore.RESET + f" See the doc at {self.docs_url} & redoc at {self.redoc_url}.")
 		if self.__app:
 			return self.__app
@@ -251,8 +271,8 @@ class Server:
 	def __define_app(self) -> None:
 		if not self.openapi_tags:
 			warnings.warn("It is recommended to use routers tags description when deploying app.")
-		self.__global_router = APIRouter(prefix=config.GLOBAL_PREFIX)
-		self.__app = FastAPI(**self.__dict__)
+		self.__global_router = APIRouter(prefix=self.prefix)
+		self.__app = FastAPI(**self.__dict__, lifespan=self._lifespan)
 		for router in self.routers:
 			self.__global_router.include_router(router)
 		self.__app.include_router(self.__global_router)
@@ -266,7 +286,8 @@ class Server:
 			except AttributeError:
 				raise AttributeError("App router must be the type of \"fastapi.APIRouter\" or "
 									 "must contains \"router\" attribute (if it's a package of your application\"")
-		self.__check_router(pkg_router)
+		if self.prefix == enums.AppUrlEnum.gateway.value:
+			self.__check_router(pkg_router)
 		self.routers.append(pkg_router)
 		self.__define_app()
 
@@ -291,3 +312,59 @@ class Server:
 					registered_path = url
 			if not registered_path:
 				raise _exceptions.NotRegisteredURL(f"<URL '{path}' '{method}' app='{app}'> isn't registered")
+
+	@staticmethod
+	@asynccontextmanager
+	async def _lifespan(app: FastAPI):
+		log(f"Starting {app.title}", app="common")  # noqa
+		yield
+		log(f"Shutting down {app.title}", app="common")  # noqa
+
+
+class FastAPIResponse(JSONResponse):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.json = None  # для ошибок
+
+
+def _convert_httpx_response_to_fastapi(response: Response) -> FastAPIResponse:
+	json_ = response.json()
+	result = FastAPIResponse(
+		status_code=response.status_code,
+		content=json_,
+		headers=response.headers
+	)
+	result.json = json_
+	# TODO если будет нужно добавлять куки, реализовать это здесь
+	return result
+
+
+async def app_request(url: str, app_path: AppPath, session: AsyncClient) -> FastAPIResponse:
+	headers = dict(app_path.request.headers)
+	json_ = await app_path.request.json()
+	if json_:
+		headers["content-length"] = str(len(json.dumps(json_)))  # нестыковка - хз почему. пересчитываю
+	else:
+		headers["content-length"] = "0"
+	request_params = {
+		"headers": headers,
+		"cookies": app_path.request.cookies,
+		"json": json_,
+		"url": app_path.get_url(url)
+	}
+	try:
+		match app_path.request.method.lower():
+			case "get":
+				response = await session.get(**request_params)
+			case "post":
+				response = await session.post(**request_params)
+			case "put":
+				response = await session.put(**request_params)
+			case "delete":
+				response = await session.delete(**request_params)
+	except httpx.ConnectError:
+		error_text = f"'{app_path.app.title().strip('/')}' server is not available"
+		error(error_text, app="gateway")
+		raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+							detail=error_text)
+	return _convert_httpx_response_to_fastapi(response)

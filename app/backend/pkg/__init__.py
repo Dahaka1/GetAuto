@@ -2,10 +2,12 @@ import warnings
 
 from colorama import Fore
 
-from ._dependencies import session
+from ._dependencies import session, client
 from . import _utils as utils
+from ._database import Base as SABase
+from ._crud import CRUDBase
 
-__all__ = ["session", "utils"]
+__all__ = ["session", "utils", "SABase", "http_exceptions", "CRUDBase", "client"]
 
 
 def warning(msg, *args, **kwargs):

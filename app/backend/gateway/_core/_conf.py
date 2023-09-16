@@ -1,1 +1,2 @@
 ENV_URLS_PATH = "SaleAutoAPP"
+USER_ID_APP_HEADER = "X-App-User-Id"

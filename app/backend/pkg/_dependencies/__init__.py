@@ -1,3 +1,3 @@
-from ._common import session
+from ._common import session, client
 
-__all__ = ["session"]
+__all__ = ["session", "client"]

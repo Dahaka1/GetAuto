@@ -1,9 +1,7 @@
-import json
-
 from fastapi import Request
 
 from enums import AppUrlEnum
-from . import _exceptions
+from . import _exceptions, _conf
 
 
 def check_url_path(path: str) -> None:
@@ -70,3 +68,14 @@ def path_data_equal(request_data: dict[str, list[str]], expected_data: dict[str,
 		if result is False:
 			return False
 	return True
+
+
+def include_user_id_to_request_headers(request: Request, user_id: int) -> Request:
+	new_headers = request.headers.mutablecopy()
+	new_headers.append(
+		_conf.USER_ID_APP_HEADER,
+		str(user_id)
+	)
+	request._headers = new_headers
+	request.scope.update(headers=request.headers.raw)
+	return request

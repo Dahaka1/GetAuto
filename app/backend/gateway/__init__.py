@@ -1,4 +1,5 @@
-from .main import gateway
+from .main import gateway, Server
+from ._auth import SAAuthenticationModel
 
-__all__ = ["gateway"]
+__all__ = ["gateway", "Server", "SAAuthenticationModel"]
 

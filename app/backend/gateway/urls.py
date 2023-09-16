@@ -9,19 +9,20 @@
 
 from ._core import AppPathCreate
 from enums import AppUrlEnum
+from ._auth import authEnum
 
 
 createUser = AppPathCreate(
-	path="/users",
+	path="/user",
 	method="post",
-	login_required=False,
 	app=AppUrlEnum.business
-).body("user").headers("x-header").query("param", "test").cookies("refreshToken")
+).body("user")
 
 
 getUsers = AppPathCreate(
 	path="/users",
 	method="get",
-	login_required=True,
+	authType=authEnum.CRM,
 	app=AppUrlEnum.business
 ).headers("X-Test-Header")
+
